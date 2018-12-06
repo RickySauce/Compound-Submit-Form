@@ -2,46 +2,82 @@ import React, { Component } from 'react';
 import { ReCaptcha } from 'react-recaptcha-google'
 
  class Form extends Component {
-    constructor(props, context) {
-        super(props, context);
-        this.onLoadRecaptcha = this.onLoadRecaptcha.bind(this);
-        this.verifyCallback = this.verifyCallback.bind(this);
-      }
+    state = {
+        token: '' 
+    }
     
       componentDidMount() {
-        if (this.captchaDemo) {
-            console.log("started, just a second...")
-            this.captchaDemo.reset();
+        fetch("https://api.ipify.org?format=json")
+        .then(data => data.json())
+        .then(json => console.log(json.ip))
+        console.log(navigator.userAgent)
+        if (this.captcha) {
+            console.log("captcha mounted")
+            this.captcha.reset();
+            this.captcha.execute();
         }
       }
+
+      handleChange = (event) => {
+        this.setState({
+          [event.target.id]: event.target.value
+        })
+      }
+  
     
-      onLoadRecaptcha() {
-          if (this.captchaDemo) {
-              this.captchaDemo.reset();
+      onloadCallback = () => {
+          console.log("loaded")
+          if (this.captcha) {
+              this.captcha.reset();
+              this.captcha.execute();
+              console.log("reset")
           }
       }
     
-      verifyCallback(recaptchaToken) {
-        // Here you will get the final recaptchaToken!!!  
-        console.log(recaptchaToken, "<= your recaptcha token")
+      verifyCallback = (token) => { 
+        console.log(token)
+        this.setState({token: token})
+      }
+
+      handleSubmit = (event) => {
+          event.preventDefault()
+          if(this.state.token){
+              alert('You have successfully subscribed')
+          } else{
+              alert(' Please verify that you are a human')
+          }
       }
     
       render() {
+          console.log(this.state)
         return (
           <div>
-            {/* You can replace captchaDemo ref with whatever works for your component */}
-            <ReCaptcha
-                ref={(el) => {this.captchaDemo = el;}}
-                size="normal"
+            <form onSubmit={this.handleSubmit}>
+                <input
+                id="firstName"
+                placeholder="First Name"
+                type="text"
+                onChange={this.handleChange}/><br/>
+                <input
+                id="lastName"
+                placeholder="Last Name"
+                type="text"
+                onChange={this.handleChange}/><br/>
+                <input
+                id="email"
+                placeholder="Email"
+                type="email"
+                onChange={this.handleChange}/><br/>
+                <input type="submit" value="Register"/>
+            </form>
+             <ReCaptcha
+                ref={(el) => {this.captcha= el;}}
+                size="invisible"
                 render="explicit"
                 sitekey="6LcMPn8UAAAAAKtGBUJmgMUPO2Qwjmjfio5yw0lD"
-                onloadCallback={this.onLoadRecaptcha}
+                onloadCallback={this.onloadCallback}
                 verifyCallback={this.verifyCallback}
             />
-            <code>
-              1. Add <strong>your site key</strong> in the ReCaptcha component. <br/>
-              2. Check <strong>console</strong> to see the token.
-            </code>
           </div>
         );
       };
