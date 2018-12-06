@@ -17,4 +17,4 @@ import Form from './Form'
     }
   }
 
-export default App
+export default App;
